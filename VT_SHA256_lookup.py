@@ -76,7 +76,7 @@ while True:
     else:
         print("Error getting votes")
 
-    # Extract detection ratio from analysis results
+    # Extract detection ratio from analysis results----Needs paid API
     if analysis is not None:
         detection_ratio = analysis["data"]["attributes"]["last_analysis_stats"]["malicious"] / analysis["data"]["attributes"]["last_analysis_stats"]["total"]
         print("-------------Detection Ratio-------------")
