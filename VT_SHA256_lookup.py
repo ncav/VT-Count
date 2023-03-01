@@ -1,6 +1,6 @@
 import requests
 
-api_key = "bff22ae9bdff6828e2b2c09b13c85c8480a17e0a7e5f40bb7f0aa53556b64265"
+api_key = ""
 
 while True:
     resource = input("Enter SHA256 Hash (or type 'exit' to quit): ")
