@@ -2,12 +2,11 @@ import requests
 
 api_key = ""
 
-# Accept comma-separated list of SHA256 hashes
-resources = input("Enter SHA256 Hashes (separated by commas): ").split(",")
+while True:
+    resource = input("Enter SHA256 Hash (or type 'exit' to quit): ")
+    if resource == "exit":
+        break
 
-for resource in resources:
-    resource = resource.strip()  # remove any whitespace around the hash value
-    
     def get_votes(api_key, resource):
         url = f"https://www.virustotal.com/api/v3/files/{resource}/votes"
         headers = {"x-apikey": api_key}
@@ -40,7 +39,7 @@ for resource in resources:
     comments = get_comments(api_key, resource)
     analysis = get_analysis(api_key, resource)
 
-    # If there are no comments, an error will display. There must be at least one comment to pull into the directories
+    # If there are no comments, Error will display. There must be at least one comment to pull into the directories
     if comments is not None:
         comment_count = 0
         for comment in comments["data"]:
@@ -84,4 +83,3 @@ for resource in resources:
         print(f"Detection ratio:{detection_ratio}")
     else:
         print("Error getting analysis")
-#Detection ration needs paid API
