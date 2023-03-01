@@ -49,3 +49,7 @@ if comments is not None:
         print(f"{author}: {content}")
 else:
     print("Error getting comments")
+    
+    
+
+#Resource does not take URL in at this time
