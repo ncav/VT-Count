@@ -33,11 +33,22 @@ while True:
             return response.json()
         else:
             return None
+    # function to get the history data for a file
+    def get_history(api_key, resource):
+        url = f"https://www.virustotal.com/api/v3/files/{resource}/history"
+        headers = {"x-apikey": api_key}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None    
+    
 
     # Pull in votes, comments, and analysis results
     votes = get_votes(api_key, resource)
     comments = get_comments(api_key, resource)
     analysis = get_analysis(api_key, resource)
+    history = get_history(api_key, resource)
 
     # If there are no comments, Error will display. There must be at least one comment to pull into the directories
     if comments is not None:
@@ -76,10 +87,18 @@ while True:
     else:
         print("Error getting votes")
 
-    # Extract detection ratio from analysis results----Needs paid API
+    # Extract detection ratio from analysis results
     if analysis is not None:
         detection_ratio = analysis["data"]["attributes"]["last_analysis_stats"]["malicious"] / analysis["data"]["attributes"]["last_analysis_stats"]["total"]
         print("-------------Detection Ratio-------------")
         print(f"Detection ratio:{detection_ratio}")
     else:
         print("Error getting analysis")
+
+    if history is not None:
+        # iterate over the history data and print out each element
+        for entry in history["data"]:
+            print(f"Timestamp: {entry['attributes']['date']} - Classification: {entry['attributes']['classification']}")
+    else:
+        print("Error retrieving history data")
+       
