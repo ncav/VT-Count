@@ -1,14 +1,37 @@
+#Add either the SHA256 or add the directory to the file to query Virustotal
+#This does not upload the file/files
+
 import requests
+import hashlib
 
 api_key = ""
 
+
+def calculate_hash(file_path):
+    with open(file_path, "rb") as f:
+        hash_object = hashlib.sha256()
+        while chunk := f.read(4096):
+            hash_object.update(chunk)
+    return hash_object.hexdigest()
+
+
 while True:
-    resource = input("Enter SHA256 Hash (or type 'exit' to quit): ")
+    resource = input("Enter SHA256 Hash or file path (or type 'exit' to quit): ")
     if resource == "exit":
         break
+    elif len(resource) == 64:
+        # resource is already a hash
+        hash_value = resource
+    else:
+        # resource is a file path, calculate its hash
+        try:
+            hash_value = calculate_hash(resource)
+        except FileNotFoundError:
+            print(f"Error: File {resource} not found")
+            continue
 
-    def get_votes(api_key, resource):
-        url = f"https://www.virustotal.com/api/v3/files/{resource}/votes"
+    def get_votes(api_key, hash_value):
+        url = f"https://www.virustotal.com/api/v3/files/{hash_value}/votes"
         headers = {"x-apikey": api_key}
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
@@ -16,14 +39,15 @@ while True:
         else:
             return None
 
-    def get_comments(api_key, resource):
-        url = f"https://www.virustotal.com/api/v3/files/{resource}/comments"
+    def get_comments(api_key, hash_value):
+        url = f"https://www.virustotal.com/api/v3/files/{hash_value}/comments"
         headers = {"x-apikey": api_key}
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             return response.json()
         else:
             return None
+
 
     def get_analysis(api_key, resource):
         url = f"https://www.virustotal.com/api/v3/files/{resource}/analyse"
@@ -45,10 +69,10 @@ while True:
     
 
     # Pull in votes, comments, and analysis results
-    votes = get_votes(api_key, resource)
-    comments = get_comments(api_key, resource)
-    analysis = get_analysis(api_key, resource)
-    history = get_history(api_key, resource)
+    votes = get_votes(api_key, hash_value)
+    comments = get_comments(api_key, hash_value)
+    analysis = get_analysis(api_key, resource)#Needs Paid API Key
+    history = get_history(api_key, resource) #Needs Paid API Key
 
     # If there are no comments, Error will display. There must be at least one comment to pull into the directories
     if comments is not None:
@@ -101,4 +125,22 @@ while True:
             print(f"Timestamp: {entry['attributes']['date']} - Classification: {entry['attributes']['classification']}")
     else:
         print("Error retrieving history data")
-       
+    def calculate_hash(file_path, api_key=None):
+        with open(file_path, "rb") as f:
+            hash_object = hashlib.sha256()
+            while chunk := f.read(4096):
+                hash_object.update(chunk)
+        hash_value = hash_object.hexdigest()
+        if api_key:
+            url = f"https://www.virustotal.com/api/v3/files/{hash_value}"
+            headers = {"x-apikey": api_key}
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                json_data = response.json()
+                if json_data["data"]["attributes"]["last_analysis_stats"]["malicious"] > 0:
+                    print("The file is malicious!")
+                else:
+                    print("The file is clean.")
+            else:
+                print("Error getting file analysis from VirusTotal.")
+        return hash_value
